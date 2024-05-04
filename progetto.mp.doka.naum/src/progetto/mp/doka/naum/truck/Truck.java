@@ -1,12 +1,11 @@
 package progetto.mp.doka.naum.truck;
-import java.time.LocalDateTime;
 
+import progetto.mp.doka.naum.routeStrategy.RouteStrategy;
 import progetto.mp.doka.naum.transport.Transport;
-import progetto.mp.doka.naum.transport.TransportTracker;
-import progetto.mp.doka.naum.transportUtils.TransportUtils;
 
 //Concrete Product
-public class Truck implements Transport, TransportTracker {
+public class Truck implements Transport {
+	private RouteStrategy routeStrategy;
 	private final String truckID;
 	private final String truckName;
 
@@ -14,36 +13,26 @@ public class Truck implements Transport, TransportTracker {
 		this.truckID = builder.truckID;
 		this.truckName = builder.truckName;
 	}
+	
+	@Override
+	public void setRoutestrategy(RouteStrategy strategy) {
+		this.routeStrategy = strategy;
+	}
 
 	@Override
 	public void deliver() {
+		if (routeStrategy != null) {
+			routeStrategy.buildRoute();
 		System.out.println("Delivering by Truck: " + truckID + "(" + truckName + ")");
+		} else {
+			System.out.println("No route strategy set for truck");
+		}
 	}
 
-	@Override
-	public String getLocation(double latitude, double longitude) {
-		return TransportUtils.getLocation(latitude, longitude);
-	}
-
-	@Override
-	public LocalDateTime getEstimatedArrivalTime() {
-		return TransportUtils.getEstimatedArrivalTime();
-	}
-
-	// Builder pattern per costruire gli oggetti Truck
+	// Builder pattern
 	public static class TruckBuilder {
 		private String truckID;
 		private String truckName;
-
-		public TruckBuilder(String truckID, String truckName) {
-			this.truckID = truckID;
-			this.truckName = truckName;
-		}
-
-		// Static factory method per creare un'istanza di TruckBuilder
-		public static TruckBuilder createBuilder(String truckID, String truckName) {
-			return new TruckBuilder(truckID, truckName);
-		}
 
 		// Setter per truckID e truckName
 		public TruckBuilder withTruckID(String truckID) {
@@ -62,4 +51,3 @@ public class Truck implements Transport, TransportTracker {
 		}
 	}
 }
-

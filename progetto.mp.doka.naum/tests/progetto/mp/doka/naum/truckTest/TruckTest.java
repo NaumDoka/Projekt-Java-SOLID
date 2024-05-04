@@ -1,55 +1,47 @@
 package progetto.mp.doka.naum.truckTest;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.LocalDateTime;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 import org.junit.jupiter.api.Test;
 
-import progetto.mp.doka.naum.transportUtils.TransportUtils;
+import progetto.mp.doka.naum.roadStrategy.RoadRouteStrategy;
+import progetto.mp.doka.naum.routeStrategy.RouteStrategy;
+import progetto.mp.doka.naum.transport.Transport;
 import progetto.mp.doka.naum.truck.Truck;
 
 class TruckTest {
+
 	@Test
-	public void testTruckDelivery() {
-		// Create a Truck instance
-		Truck truck = new Truck.TruckBuilder("TRUCK-VIN", "OPTIMUS PRIME").build();
-
-		// Check if truck instance is not null
-		assertNotNull(truck);
-
-		// Perform delivery
-		truck.deliver();
-	}
-	
-	@Test
-    public void testGetLocation() {
-        // Mock latitude and longitude
-        double latitude = 40.7128;
-        double longitude = -74.0060;
-
-        // Get location for Truck
-        String location = TransportUtils.getLocation(latitude, longitude);
-
-        // Check if location string is not null
-        assertNotNull(location);
-
-        // Check if location string contains latitude and longitude
-        assertTrue(location.contains(String.valueOf(latitude)));
-        assertTrue(location.contains(String.valueOf(longitude)));
+    void testTruckDeliveryWithRouteStrategy() {
+        RouteStrategy routeStrategy = new RoadRouteStrategy();
+        Transport truck = new Truck.TruckBuilder()
+                .withTruckID("TRUCK-VIN")
+                .withTruckName("OPTIMUS PRIME")
+                .build();
+        truck.setRoutestrategy(routeStrategy);
+        /* We redirect the System.out stream to capture the output of the deliver() method and then assert the expected output
+         * This way, we're ensuring that the deliver() method behaves as expected
+         */
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        truck.deliver();
+        String expectedOutput = "Routing by road..." + System.lineSeparator() + "Delivering by Truck: TRUCK-VIN(OPTIMUS PRIME)" + System.lineSeparator();
+        assertEquals(expectedOutput, outputStream.toString());
     }
-	
-	@Test
-    public void testGetEstimatedArrivalTime() {
-        // Get estimated arrival time
-        LocalDateTime estimatedArrivalTime = TransportUtils.getEstimatedArrivalTime();
 
-        // Check if estimated arrival time is not null
-        assertNotNull(estimatedArrivalTime);
-
-        // Check if estimated arrival time is within 24 hours from now
-        assertTrue(estimatedArrivalTime.isAfter(LocalDateTime.now()));
-        assertTrue(estimatedArrivalTime.isBefore(LocalDateTime.now().plusHours(24)));
+    @Test
+    void testTruckDeliveryWithoutRouteStrategy() {
+        Transport truck = new Truck.TruckBuilder()
+                .withTruckID("TRUCK-VIN")
+                .withTruckName("OPTIMUS PRIME")
+                .build();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        truck.deliver();
+        String expectedOutput = "No route strategy set for truck" + System.lineSeparator();
+        assertEquals(expectedOutput, outputStream.toString());
     }
 }

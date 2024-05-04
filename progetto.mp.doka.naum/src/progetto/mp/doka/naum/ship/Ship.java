@@ -1,12 +1,11 @@
 package progetto.mp.doka.naum.ship;
-import java.time.LocalDateTime;
 
+import progetto.mp.doka.naum.routeStrategy.RouteStrategy;
 import progetto.mp.doka.naum.transport.Transport;
-import progetto.mp.doka.naum.transport.TransportTracker;
-import progetto.mp.doka.naum.transportUtils.TransportUtils;
 
 //Concrete Product
-public class Ship implements Transport, TransportTracker {
+public class Ship implements Transport {
+	private RouteStrategy routeStrategy;
 	private final String shipID;
 	private final String shipName;
 
@@ -16,34 +15,24 @@ public class Ship implements Transport, TransportTracker {
 	}
 
 	@Override
+	public void setRoutestrategy(RouteStrategy strategy) {
+		this.routeStrategy = strategy;
+	}
+
+	@Override
 	public void deliver() {
-		System.out.println("Delivering by Ship: " + shipID + "(" + shipName + ")");
+		if (routeStrategy != null) {
+			routeStrategy.buildRoute();
+			System.out.println("Delivering by Ship: " + shipID + "(" + shipName + ")");
+		} else {
+			System.out.println("No route strategy set for ship");
+		}
 	}
 
-	@Override
-	public String getLocation(double latitude, double longitude) {
-		 return TransportUtils.getLocation(latitude, longitude);
-	}
-
-	@Override
-	public LocalDateTime getEstimatedArrivalTime() {
-		return TransportUtils.getEstimatedArrivalTime();
-	}
-
-	// Builder pattern per costruire gli oggetti Ship
+	// Builder pattern
 	public static class ShipBuilder {
 		private String shipID;
 		private String shipName;
-
-		public ShipBuilder(String shipID, String shipName) {
-			this.shipID = shipID;
-			this.shipName = shipName;
-		}
-
-		// Static factory method per creare un'istanza di ShipBuilder
-		public static ShipBuilder createBuilder(String shipID, String shipName) {
-			return new ShipBuilder(shipID, shipName);
-		}
 
 		// Setter per shipID e shipName
 		public ShipBuilder withShipID(String shipID) {
@@ -62,4 +51,3 @@ public class Ship implements Transport, TransportTracker {
 		}
 	}
 }
-

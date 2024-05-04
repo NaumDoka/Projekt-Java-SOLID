@@ -1,58 +1,47 @@
 package progetto.mp.doka.naum.shipTest;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.LocalDateTime;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 import org.junit.jupiter.api.Test;
 
+import progetto.mp.doka.naum.routeStrategy.RouteStrategy;
+import progetto.mp.doka.naum.seaStrategy.SeaRouteStrategy;
 import progetto.mp.doka.naum.ship.Ship;
 import progetto.mp.doka.naum.transport.Transport;
-import progetto.mp.doka.naum.transportUtils.TransportUtils;
 
 class ShipTest {
 
 	@Test
-    public void testShipDelivery() {
-        // Create a Ship instance
-        Transport ship = new Ship.ShipBuilder("SHIP-IMO", "BLACK PEARL").build();
-
-        // Check if ship instance is not null
-        assertNotNull(ship);
-
-        // Perform delivery
+    void testShipDeliveryWithRouteStrategy() {
+        RouteStrategy routeStrategy = new SeaRouteStrategy();
+        Transport ship = new Ship.ShipBuilder()
+                .withShipID("SHIP-IMO")
+                .withShipName("BLACK PEARL")
+                .build();
+        ship.setRoutestrategy(routeStrategy);
+        /* We redirect the System.out stream to capture the output of the deliver() method and then assert the expected output
+         * This way, we're ensuring that the deliver() method behaves as expected
+         */
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
         ship.deliver();
+        String expectedOutput = "Routing by sea..." + System.lineSeparator() + "Delivering by Ship: SHIP-IMO(BLACK PEARL)" + System.lineSeparator();
+        assertEquals(expectedOutput, outputStream.toString());
     }
-	
-	@Test
-    public void testGetLocation() {
-        // Mock latitude and longitude
-        double latitude = 37.7749;
-        double longitude = -122.4194;
 
-        // Get location for Ship
-        String location = TransportUtils.getLocation(latitude, longitude);
-
-        // Check if location string is not null
-        assertNotNull(location);
-
-        // Check if location string contains latitude and longitude
-        assertTrue(location.contains(String.valueOf(latitude)));
-        assertTrue(location.contains(String.valueOf(longitude)));
-    }
-	
-	@Test
-    public void testGetEstimatedArrivalTime() {
-        // Get estimated arrival time
-        LocalDateTime estimatedArrivalTime = TransportUtils.getEstimatedArrivalTime();
-
-        // Check if estimated arrival time is not null
-        assertNotNull(estimatedArrivalTime);
-
-        // Check if estimated arrival time is within 24 hours from now
-        assertTrue(estimatedArrivalTime.isAfter(LocalDateTime.now()));
-        assertTrue(estimatedArrivalTime.isBefore(LocalDateTime.now().plusHours(24)));
+    @Test
+    void testShipDeliveryWithoutRouteStrategy() {
+        Transport ship = new Ship.ShipBuilder()
+                .withShipID("SHIP-IMO")
+                .withShipName("BLACK PEARL")
+                .build();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        ship.deliver();
+        String expectedOutput = "No route strategy set for ship" + System.lineSeparator();
+        assertEquals(expectedOutput, outputStream.toString());
     }
 }
-

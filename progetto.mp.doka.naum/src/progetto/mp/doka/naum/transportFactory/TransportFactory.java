@@ -4,6 +4,6 @@ import progetto.mp.doka.naum.transport.Transport;
 
 //Abstract Factory
 public interface TransportFactory {
-	Transport createTransport();
+	Transport createTruck();
+	Transport createShip();
 }
-
